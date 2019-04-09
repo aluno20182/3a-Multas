@@ -6,12 +6,12 @@ using System.Web;
 
 namespace Multas.Models
 {
-    public class Multas_DB : DbContext
+    public class MultasDB : DbContext
     {
 
         // MultasDB
 
-        public Multas_DB() : base("MultasDBConnectionString") { }
+        public MultasDB() : base("MultasDBConnectionString") { }
 
         // vamos colocar, aqui, as instruções relativas às tabelas do 'negócio'
         // descrever os nomes das tabelas na Base de Dados
