@@ -125,7 +125,7 @@
     <Compile Include="Models\Agentes.cs" />
     <Compile Include="Models\Condutores.cs" />
     <Compile Include="Models\Multas.cs" />
-    <Compile Include="Models\Multas_DB.cs" />
+    <Compile Include="Models\MultasDB.cs" />
     <Compile Include="Models\Viaturas.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
