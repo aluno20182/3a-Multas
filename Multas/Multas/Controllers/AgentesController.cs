@@ -46,7 +46,7 @@ namespace Multas.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes)
+        public ActionResult Create([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes, HttpPostedFileBase fotografia)
         {
             if (ModelState.IsValid)
             {
@@ -109,9 +109,25 @@ namespace Multas.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Agentes agentes = db.Agentes.Find(id);
-            db.Agentes.Remove(agentes);
-            db.SaveChanges();
+            //variavel deve-se chamar de agente pois é um objeto singula, está no plural pq mete o nome da classe
+            Agentes agente = db.Agentes.Find(id);
+
+            try
+            {
+                db.Agentes.Remove(agente);
+                db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                //captura a excessão e processa o código para resolver o problema
+                //pode haver mais do que um 'catch' associado a um 'try'
+
+                //enviar msg de erro para o utilizador
+                ModelState.AddModelError("", "Ocorreu um erro com a eliminação do Agente" + agente.Nome + ", Provavelmente relacionado com o facto do " + "agente ter emitido multas...");
+
+                throw;
+            }
+
             return RedirectToAction("Index");
         }
 
