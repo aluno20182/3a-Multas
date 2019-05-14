@@ -8,6 +8,7 @@ namespace Multas.Models
 {
     public class Multas
     {
+
         public int ID { get; set; }
 
         public string Infracao { get; set; }
@@ -18,29 +19,27 @@ namespace Multas.Models
 
         public DateTime DataDaMulta { get; set; }
 
-        //  *************************************
-        //  Criação das chaves Forasteiras
-        //  *************************************
+        // **************************************
+        // criação das Chaves Forasteiras
+        // **************************************
 
-        //  FK para Viatura
-        [ForeignKey("Viatura")]  //Anotações são feitas sobre o objeto que está por baixo
-        public int ViaturaFK { get; set; }  //Base de Dados
+        // FK para Viatura
+        [ForeignKey("Viatura")]
+        public int ViaturaFK { get; set; }  // Base de Dados
+        public Viaturas Viatura { get; set; }  // C#
 
-        public Viaturas Viatura { get; set; }   // C#
+        // FK para Condutor
+        [ForeignKey("Condutor")]
+        public int CondutorFK { get; set; }
+        public Condutores Condutor { get; set; }
 
-        [ForeignKey("Agente")]  //Anotações são feitas sobre o objeto que está por baixo
-        public int AgenteFK { get; set; }  //Base de Dados
+        // FK para Agente
+        [ForeignKey("Agente")]
+        public int AgenteFK { get; set; }
+        public Agentes Agente { get; set; }
 
-        public Agentes Agente { get; set; }   // C#
-
-        [ForeignKey("Condutor")]  //Anotações são feitas sobre o objeto que está por baixo
-        public int CondutorFK { get; set; }  //Base de Dados
-
-        public Condutores Condutor { get; set; }   // C#
-
-
-        //lista das multas associadas à viatura
-        public ICollection<Multas> ListaDeMultas { get; set; }
 
     }
+
+
 }

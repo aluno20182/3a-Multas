@@ -1,16 +1,17 @@
 ﻿@model Multas.Models.Agentes
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Remover";
 }
 
-<h2>Delete</h2>
+<h2>Agentes</h2>
 
 <h3>Deseja remover este Agente?</h3>
 <div>
     <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <br />
 
-    <br>
     <dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Nome)
@@ -38,7 +39,8 @@
 
     </dl>
 
-    @using (Html.BeginForm()) {
+    @using (Html.BeginForm())
+    {
         @Html.AntiForgeryToken()
 
         <div class="form-actions no-color">
