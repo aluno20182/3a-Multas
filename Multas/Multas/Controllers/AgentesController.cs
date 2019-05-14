@@ -36,6 +36,10 @@ namespace Multas.Controllers
         }
 
         // GET: Agentes/Create
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Create()
         {
             return View();
@@ -44,15 +48,40 @@ namespace Multas.Controllers
         // POST: Agentes/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+
+
+        /// <summary>
+        /// recolhe os dados da View, sobre o novo Agente
+        /// </summary>
+        /// <param name="agentes"> dados do novo agente</param>
+        /// <param name="fotografia"> ficheiro com a foto do novo agente</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes, HttpPostedFileBase fotografia)
         {
+
+        ///1º será que foi enviado um ficheiro?
+        ///2º será que o ficheiro, se foi, fornecido, é do tipo correto?
+        ///3º qual o nome a atribuir ao ficheiro?
+        ///4º como associar ao novo Agente?
+        ///5º como o guardar no disco rigido? e onde?
+
+            //confronta os dados qu vêm da view com a forma que os dados devem ter
+            //ie. Valida os dados com o Modelo
             if (ModelState.IsValid)
             {
-                db.Agentes.Add(agentes);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                try
+                {
+                    db.Agentes.Add(agentes);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
             }
 
             return View(agentes);

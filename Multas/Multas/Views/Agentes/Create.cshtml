@@ -1,51 +1,70 @@
 ﻿@model Multas.Models.Agentes
 
 @{
-    ViewBag.Title = "Remover";
+    ViewBag.Title = "Agentes";
 }
 
-<h2>Agentes</h2>
+<h2>Adicionar novo Agente</h2>
 
-<h3>Deseja remover este Agente?</h3>
-<div>
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-    <br />
+@*especificar o formulário*@
+@using (Html.BeginForm("Create",
+                      "Agentes",
+                      FormMethod.Post,
+                      new { enctype = "multipart/form-data" }))
+{
 
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Esquadra)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Esquadra)
-        </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Fotografia)
-        </dt>
+    @Html.AntiForgeryToken()
 
-        <dd>
-            @Html.DisplayFor(model => model.Fotografia)
-        </dd>
+    <div class="form-horizontal">
 
-    </dl>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Remover" class="btn btn-default" /> |
-            @Html.ActionLink("Regressar à listagem", "Index")
+        <div class="form-group">
+            @Html.LabelFor(model => model.Nome, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "text-danger" })
+            </div>
         </div>
-    }
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Esquadra, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Esquadra, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Esquadra, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Fotografia, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*Adicionar um 'file-upload'*@
+                <input type="file" name="fotografia" accept=".jpg" />
+
+                @*@Html.EditorFor(model => model.Fotografia, new { htmlAttributes = new { @class = "form-control" } })*@
+
+
+                @Html.ValidationMessageFor(model => model.Fotografia, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Adicionar" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
 </div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
