@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -17,6 +18,9 @@ namespace Multas.Controllers
         // GET: Agentes
         public ActionResult Index()
         {
+
+            Session["Metodo"] = "";
+
             return View(db.Agentes.ToList());
         }
 
@@ -25,19 +29,23 @@ namespace Multas.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return RedirectToAction("Index");
             }
-            Agentes agentes = db.Agentes.Find(id);
-            if (agentes == null)
+            Agentes agente = db.Agentes.Find(id);
+
+            if (agente == null)
             {
-                return HttpNotFound();
+                return RedirectToAction("Index");
             }
-            return View(agentes);
+
+            Session["Metodo"] = "";
+
+            return View(agente);
         }
 
         // GET: Agentes/Create
         /// <summary>
-        /// 
+        /// mostra a view para carregar os dados de um novo Agente
         /// </summary>
         /// <returns></returns>
         public ActionResult Create()
@@ -49,42 +57,91 @@ namespace Multas.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
 
-
         /// <summary>
-        /// recolhe os dados da View, sobre o novo Agente
+        /// recolhe os dados da View, sobre um novo Agente
         /// </summary>
-        /// <param name="agentes"> dados do novo agente</param>
-        /// <param name="fotografia"> ficheiro com a foto do novo agente</param>
+        /// <param name="agente">dados do novo Agente</param>
+        /// <param name="fotografia">ficheiro com a foto do novo Agente</param>
         /// <returns></returns>
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes, HttpPostedFileBase fotografia)
+        public ActionResult Create([Bind(Include = "Nome,Esquadra")] Agentes agente, HttpPostedFileBase fotografia)
         {
+            //vars auxiliares
+            string caminho = "";
+            bool ficheiroValido = false;
 
-        ///1º será que foi enviado um ficheiro?
-        ///2º será que o ficheiro, se foi, fornecido, é do tipo correto?
-        ///3º qual o nome a atribuir ao ficheiro?
-        ///4º como associar ao novo Agente?
-        ///5º como o guardar no disco rigido? e onde?
+            /// 1º será que foi enviado um ficheiro?
+            if(fotografia == null)
+            {
+                //atribuir uma foto por defeito ao Agente
+                agente.Fotografia = "6c4301174454fa5f84e6ca6cca1e7ed6.jpg";
+            }
+            else
+            {
+                /// 2º será que o ficheiro, se foi fornecido, é do tipo correto?
+                string mimeType = fotografia.ContentType;
+                if(mimeType == "image/jpeg" || mimeType == "image/png")
+                {
+                    //o ficheiro é do tipo correto
 
-            //confronta os dados qu vêm da view com a forma que os dados devem ter
-            //ie. Valida os dados com o Modelo
+                    /// 3º qual o nome a atribuir ao ficheiro?
+                    Guid g;
+                    g = Guid.NewGuid(); //Obtem os dados para o nome do ficheiro
+                    
+                    // e qual a extensão do ficheiro?
+
+                    string extensao = Path.GetExtension(fotografia.FileName).ToLower();
+                    //montar o novo nome
+                    string nomeFicheiro = g.ToString() + extensao;
+
+                    //onde guardar o ficheiro?
+                    caminho = Path.Combine(Server.MapPath("~/imagens/"), nomeFicheiro);
+
+                    /// 4º como o associar ao novo Agente?
+                    agente.Fotografia = nomeFicheiro;
+
+                    //marcar ficheiro como válido
+                    ficheiroValido = true;
+
+                }
+                else
+                {
+                    //o ficheiro fornecido não é valido
+                    //atribuir foto default ao user
+                    agente.Fotografia = "6c4301174454fa5f84e6ca6cca1e7ed6.jpg";
+
+                }
+
+            }
+
+            /// confronta os dados q vêm da view com a forma que os dados devem ter.
+            /// ie, valida os dados com o Modelo
             if (ModelState.IsValid)
             {
                 try
                 {
-                    db.Agentes.Add(agentes);
+                    db.Agentes.Add(agente);
                     db.SaveChanges();
+
+                    /// 5º como o guardar no disco rígido? e onde?
+                    if (ficheiroValido)
+                    {
+
+                    }
+                    fotografia.SaveAs(caminho);
+
                     return RedirectToAction("Index");
                 }
                 catch (Exception)
                 {
-
                     throw;
                 }
+
             }
 
-            return View(agentes);
+            return View(agente);
         }
 
         // GET: Agentes/Edit/5
@@ -102,67 +159,87 @@ namespace Multas.Controllers
             return View(agentes);
         }
 
- 
+        // POST: Agentes/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(agentes).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(agentes);
+        }
+
+
 
         // GET: Agentes/Delete/5
         /// <summary>
-        /// 
+        /// mostra na view os dados de um agente para porterior, eventual, remoção
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">identificador do agente a remover</param>
         /// <returns></returns>
         public ActionResult Delete(int? id)
         {
 
-            //o ID do agente não foi fornecido
-            //não é possivel procurar o Agente
+            // o ID do agente não foi fornecido
+            // não é possível procurar o Agente
             // o que devo fazer?
             if (id == null)
             {
-                ///opção por defeito do 'template'
-                ///return new HttpSatusCodeResult(HttpStatusCode.BadRequest);
+                ///  opção por defeito do 'template'
+                ///  return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-                /// e ão há ID do Agente, uma de duas coisas aconteceu:
-                ///     -há um erro nos links da app
-                ///     -há um 'chico esperto' a fazer asneiras no URL
+                /// e não há ID do Agente, uma de duas coisas aconteceu:
+                ///   - há um erro nos links da aplicação
+                ///   - há um 'chico experto' a fazer asneiras no URL
 
-
-                //redereciono o utilizador para o ecrã inicial
+                /// redireciono o utilzador para o ecrã incial
                 return RedirectToAction("Index");
             }
 
-            //procurar os dados do Agente, cujo ID é fornecido
+
+            // procura os dados do Agentes, cujo ID é fornecido
             Agentes agente = db.Agentes.Find(id);
 
-            ///se o agente não for encontrado
+            /// se o agente não fôr encontrado
             if (agente == null)
             {
-                //ou há erro,
-                //ou há um 'chico esperto'...
+                // ou há um erro,
+                // ou há um 'chico experto'...
+                //   return HttpNotFound();
 
-                //redereciono o utilizador para o ecrã inicial
+                /// redireciono o utilzador para o ecrã incial
                 return RedirectToAction("Index");
-
             }
 
-            //para o caso do utilizador alterar, de forma fraudulenta, os dados
-            //do Agente, vamos guardá-los internamente
-            //Para isso, vou guardar o valor do ID do Agente
-            //  -guardar o ID do Agente num cookie cifrado
-            //  -guardar o ID nume var. de sessão (quem estiver a usar o Asp .Net Core já não tem esta ferramenta...)
-            //  - outras opções
-
+            /// para o caso do utilizador alterar, de forma fraudulenta,
+            /// os dados do Agente, vamos guardá-los internamente
+            /// Para isso, vou guardar o valor do ID do Agente
+            /// - guardar o ID do Agente num cookie cifrado
+            /// - guardar o ID numa var. de sessão 
+            ///      (quem estiver a usar o Asp .Net Core já não tem esta ferramenta...)
+            /// - outras opções...
             Session["IdAgente"] = agente.ID;
             Session["Metodo"] = "Agentes/Delete";
 
-            //Envia para a View os dados do Agente em encontrado
+            // envia para a View os dados do Agente encontrado
             return View(agente);
         }
+
+
+
+
 
         // POST: Agentes/Delete/5
         /// <summary>
         /// concretizar a operação de remoção de um agente
         /// </summary>
-        /// <param name="id">identificador do agente</param>
+        /// <param name="id"> identificador do agente</param>
         /// <returns></returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -171,35 +248,35 @@ namespace Multas.Controllers
 
             if (id == null)
             {
-                ///se entrei aqui, é pq há um erro
-                ///não se sabe o ID do agente a remover
+                // se entrei aqui,é porque é pq há um erro
+                // nao se sabe o ID do agente a remover
                 return RedirectToAction("Index");
             }
 
-            ///avaliar se o ID do agente que é fornecido
-            ///é o mesmo ID do agente que foi apresentado no ecrã
-            if(id!=(int)Session["IdAgente"])
+            // avaliar se o ID do agente que é fornecido
+            // é o mesmo ID do agente que foi apresentado no ecrã
+            if (id != (int)Session["IdAgente"])
             {
-                //há um ataque!!
-                //redirecionar para a pagina de Index
+                // há um ataque!
+                // redirecionar para a página de Index
                 return RedirectToAction("Index");
             }
 
-            ///avaliar se o metodo é o que é esperado
+            // avaliar se o método é o que é esperado
             string operacao = "Agentes/Delete";
             if (operacao != (string)Session["Metodo"])
             {
-                //há um ataque!!
-                //redirecionar para a pagina de Index
+                // há um ataque!
+                // redirecionar para a página de Index
                 return RedirectToAction("Index");
             }
 
-            //procurar dados do Agente na BD
+            // procura os dados do Agente, na BD
             Agentes agente = db.Agentes.Find(id);
 
             if (agente == null)
             {
-                //não foi possivel entcontrar o Agente
+                // não foi possível encontrar o Agente
                 return RedirectToAction("Index");
             }
 
